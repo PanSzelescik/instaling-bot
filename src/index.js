@@ -79,7 +79,7 @@ async function handleStop(browser, page) {
     console.log('[STOP] Saving words...');
     const json = {};
     words.forEach((value, key) => json[key] = value);
-    await fs.writeFile('config/Words.json', JSON.stringify(json));
+    await fs.writeFile('config/Words.json', JSON.stringify(json, null, 4));
 
     console.log('[STOP] Confirming...');
     await click(page, '#return_mainpage');
