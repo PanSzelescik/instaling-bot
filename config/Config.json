@@ -1,0 +1,17 @@
+{
+    "login": "",
+    "password": "",
+    "sites": {
+        "login": "https://instaling.pl/teacher.php?page=login"
+    },
+    "delays": {
+        "default": 3000,
+        "type": 100,
+        "selector": 10000,
+        "wait_min": 1800,
+        "wait_max": 3500,
+        "check": 3000,
+        "next_word": 1000
+    },
+    "valid_chance": 1
+}
