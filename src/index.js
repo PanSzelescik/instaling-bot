@@ -110,9 +110,7 @@ async function clickWait(page, selector, wait = config.delays.default) {
 }
 
 async function delay(time) {
-    return new Promise(function (resolve) {
-        setTimeout(resolve, time);
-    });
+    return new Promise(resolve => setTimeout(resolve, time));
 }
 
 function getRandomInt(min, max) {
