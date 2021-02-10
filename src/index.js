@@ -1,13 +1,13 @@
-const {launch} = require('puppeteer');
+const puppeteer = require('puppeteer');
 const config = require('../config/Config.json');
-const {writeFile} = require('fs/promises');
+const fs = require('fs/promises');
 
 const words = new Map();
 Object.entries(require('../config/Words.json')).forEach(([polish, english]) => words.set(polish, english));
 
 // MAIN
 (async () => {
-    const browser = await launch({headless: false});
+    const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
 
     await login(page);
@@ -57,7 +57,7 @@ async function answerQuestion(page) {
             console.log(`[ANSWER] Typing!`);
             await page.type('#answer', translation, {delay: getRandomInt(config.delays.type_min, config.delays.type_max)});
         } else {
-            console.log(`[ANSWER] Not typing! ${random} is smaller than ${config.valid_chance}`);
+            console.log(`[ANSWER] Not typing! ${random} is higher than ${config.valid_chance}`);
         }
     } else {
         console.log(`[ANSWER] Not found translation for: ${polish}`);
@@ -79,7 +79,7 @@ async function handleStop(browser, page) {
     console.log('[STOP] Saving words...');
     const json = {};
     words.forEach((value, key) => json[key] = value);
-    await writeFile('config/Words.json', JSON.stringify(json, null, 4));
+    await fs.writeFile('config/Words.json', JSON.stringify(json, null, 4));
 
     console.log('[STOP] Confirming...');
     await click(page, '#return_mainpage');
