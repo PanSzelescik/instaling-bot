@@ -1,13 +1,13 @@
-const puppeteer = require('puppeteer');
+const {launch} = require('puppeteer');
 const config = require('../config/Config.json');
-const fs = require('fs/promises');
+const {writeFile} = require('fs/promises');
 
 const words = new Map();
 Object.entries(require('../config/Words.json')).forEach(([polish, english]) => words.set(polish, english));
 
 // MAIN
 (async () => {
-    const browser = await puppeteer.launch({headless: false});
+    const browser = await launch({headless: false});
     const page = await browser.newPage();
 
     await login(page);
@@ -79,7 +79,7 @@ async function handleStop(browser, page) {
     console.log('[STOP] Saving words...');
     const json = {};
     words.forEach((value, key) => json[key] = value);
-    await fs.writeFile('config/Words.json', JSON.stringify(json, null, 4));
+    await writeFile('config/Words.json', JSON.stringify(json, null, 4));
 
     console.log('[STOP] Confirming...');
     await click(page, '#return_mainpage');
