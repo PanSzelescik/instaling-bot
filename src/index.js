@@ -27,8 +27,8 @@ Object.entries(require('../config/Words.json')).forEach(([polish, english]) => w
 async function login(page) {
     await page.goto(config.sites.login);
     console.log('[LOGIN] Logging in...');
-    await page.type('#log_email', config.login, {delay: config.delays.type});
-    await page.type('#log_password', config.password, {delay: config.delays.type});
+    await page.type('#log_email', config.login, {delay: getRandomInt(config.delays.type_min, config.delays.type_max)});
+    await page.type('#log_password', config.password, {delay: getRandomInt(config.delays.type_min, config.delays.type_max)});
     await click(page, '#main-container > div:nth-child(2) > form > div > div:nth-child(3) > button');
     console.log('[LOGIN] Logged in!');
 }
@@ -55,7 +55,7 @@ async function answerQuestion(page) {
         const random = Math.random();
         if (random < config.valid_chance) {
             console.log(`[ANSWER] Typing!`);
-            await page.type('#answer', translation, {delay: config.delays.type});
+            await page.type('#answer', translation, {delay: getRandomInt(config.delays.type_min, config.delays.type_max)});
         } else {
             console.log(`[ANSWER] Not typing! ${random} is smaller than ${config.valid_chance}`);
         }
@@ -63,7 +63,7 @@ async function answerQuestion(page) {
         console.log(`[ANSWER] Not found translation for: ${polish}`);
     }
 
-    await clickWait(page, '#check', config.delays.check);
+    await clickWait(page, '#check', getRandomInt(config.delays.check_min, config.delays.check_max));
     const english = await getText(page, '#word');
     console.log(`[ANSWER] Valid translation for: ${polish} is: ${english}`);
     if (words.get(polish) !== english) {
@@ -72,7 +72,7 @@ async function answerQuestion(page) {
     }
 
     console.log(`[ANSWER] Next word!`);
-    await clickWait(page, '#next_word', config.delays.next_word);
+    await clickWait(page, '#next_word', getRandomInt(config.delays.next_word_min, config.delays.next_word_max));
 }
 
 async function handleStop(browser, page) {

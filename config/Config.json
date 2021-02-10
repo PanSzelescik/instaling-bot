@@ -6,12 +6,15 @@
     },
     "delays": {
         "default": 3000,
-        "type": 100,
+        "type_min": 80,
+        "type_max": 130,
         "selector": 10000,
         "wait_min": 1800,
         "wait_max": 3500,
-        "check": 3000,
-        "next_word": 1000
+        "check_min": 2500,
+        "check_max": 3000,
+        "next_word_min": 800,
+        "next_word_max": 1200
     },
     "valid_chance": 1
 }
