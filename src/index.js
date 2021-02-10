@@ -3,6 +3,7 @@ const config = require('../config/Config.json');
 const fs = require('fs/promises');
 
 const words = new Map();
+let i = 0;
 Object.entries(require('../config/Words.json')).forEach(([polish, english]) => words.set(polish, english));
 
 // MAIN
@@ -43,35 +44,35 @@ async function startSession(page) {
 }
 
 async function answerQuestion(page) {
-    console.log('[ANSWER] Detecting word...');
+    console.log(`[ANSWER ${i++}] Detecting word...`);
     const polish = await getText(page, '#question > div.caption > div.translations');
 
-    console.log(`[ANSWER] Detected polish word: ${polish}`);
+    console.log(`[ANSWER ${i}] Detected polish word: ${polish}`);
     await delay(getRandomInt(config.delays.wait_min, config.delays.wait_max));
 
     if (words.has(polish)) {
         const translation = words.get(polish);
-        console.log(`[ANSWER] Found translation for: ${polish}: ${translation}`);
+        console.log(`[ANSWER ${i}] Found translation for: ${polish}: ${translation}`);
         const random = Math.random();
         if (random < config.valid_chance) {
-            console.log(`[ANSWER] Typing!`);
+            console.log(`[ANSWER ${i}] Typing!`);
             await page.type('#answer', translation, {delay: getRandomInt(config.delays.type_min, config.delays.type_max)});
         } else {
-            console.log(`[ANSWER] Not typing! ${random} is higher than ${config.valid_chance}`);
+            console.log(`[ANSWER] ${i} Not typing! ${random} is higher than ${config.valid_chance}`);
         }
     } else {
-        console.log(`[ANSWER] Not found translation for: ${polish}`);
+        console.log(`[ANSWER ${i}] Not found translation for: ${polish}`);
     }
 
     await clickWait(page, '#check', getRandomInt(config.delays.check_min, config.delays.check_max));
     const english = await getText(page, '#word');
-    console.log(`[ANSWER] Valid translation for: ${polish} is: ${english}`);
+    console.log(`[ANSWER ${i}] Valid translation for: ${polish} is: ${english}`);
     if (words.get(polish) !== english) {
-        console.log(`[ANSWER] Saving translation for: ${polish}: ${english}`);
+        console.log(`[ANSWER ${i}] Saving translation for: ${polish}: ${english}`);
         words.set(polish, english);
     }
 
-    console.log(`[ANSWER] Next word!`);
+    console.log(`[ANSWER ${i}] Next word!`);
     await clickWait(page, '#next_word', getRandomInt(config.delays.next_word_min, config.delays.next_word_max));
 }
 
