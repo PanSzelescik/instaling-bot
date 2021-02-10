@@ -5,7 +5,8 @@
         "login": "https://instaling.pl/teacher.php?page=login"
     },
     "delays": {
-        "default": 3000,
+        "click_min": 2500,
+        "click_max": 3500,
         "type_min": 80,
         "type_max": 130,
         "selector": 10000,

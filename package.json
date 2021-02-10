@@ -2,14 +2,15 @@
   "name": "instaling-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "src/main.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/main.js"
   },
   "keywords": [],
   "author": "PanSzelescik",
   "license": "ISC",
   "dependencies": {
+    "chalk": "^4.1.0",
     "puppeteer": "^7.0.4"
   }
 }

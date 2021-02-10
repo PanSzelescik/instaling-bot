@@ -1,0 +1,99 @@
+const puppeteer = require('puppeteer');
+const config = require('../config/Config.json');
+const {getText, click, clickWait, type, delay, getRandomInt, isVisible} = require('./helpers.js');
+const {green, yellow, red, blue} = require('./printer.js');
+const words = require('./words.js');
+const chalk = require('chalk');
+
+let i = 0;
+
+// MAIN
+(async () => {
+    const browser = await puppeteer.launch({headless: false});
+    const page = await browser.newPage();
+
+    await login(page);
+    await startSession(page);
+    try {
+        // Jak się wypierdoli to znaczy że koniec i można zamknąć
+        while (true) {
+            await answerQuestion(page);
+        }
+    } catch (e) {
+        console.error(e);
+        await handleStop(browser, page);
+    }
+})();
+
+// STEPS
+async function login(page) {
+    blue('[LOGIN] Logging in...');
+    await page.goto(config.sites.login);
+
+    await type(page, '#log_email', config.login);
+    await type(page, '#log_password', config.password);
+
+    await click(page, '#main-container > div:nth-child(2) > form > div > div:nth-child(3) > button');
+    green('[LOGIN] Logged in!');
+}
+
+async function startSession(page) {
+    blue('[START] Starting...');
+    await click(page, '#session_button');
+
+    if (await isVisible(page, '#continue_session_button')) {
+        await clickWait(page, '#continue_session_button');
+        green('[START] Continue!');
+    } else {
+        await clickWait(page, '#start_session_button');
+        green('[START] Start!');
+    }
+}
+
+async function answerQuestion(page) {
+    i++;
+    blue(`[ANSWER ${i}] Detecting word...`);
+    const polish = await getText(page, '#question > div.caption > div.translations');
+
+    blue(`[ANSWER ${i}] Detected polish word: ${chalk.white(polish)}`);
+    await delay(getRandomInt(config.delays.wait_min, config.delays.wait_max));
+
+    if (words.has(polish)) {
+        const translation = words.get(polish);
+        green(`[ANSWER ${i}] Found translation for: ${chalk.white(polish)}: ${chalk.cyan(translation)}`);
+        const random = Math.random();
+        if (random < config.valid_chance) {
+            green(`[ANSWER ${i}] Typing!`);
+            await type(page, '#answer', translation);
+        } else {
+            yellow(`[ANSWER ${i}] Not typing! ${chalk.white(random)} is higher than ${chalk.cyan(config.valid_chance)}`);
+        }
+    } else {
+        red(`[ANSWER ${i}] Not found translation for: ${chalk.white(polish)}`);
+    }
+
+    await clickWait(page, '#check', config.delays.check_min, config.delays.check_max);
+
+    const english = await getText(page, '#word');
+    blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(english)}`);
+    if (words.get(polish) !== english) {
+        yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(english)}`);
+        await words.set(polish, english);
+    }
+
+    blue(`[ANSWER ${i}] Next word!`);
+    await clickWait(page, '#next_word', config.delays.next_word_min, config.delays.next_word_max);
+}
+
+async function handleStop(browser, page) {
+    await words.save();
+
+    blue('[STOP] Confirming...');
+    await click(page, '#return_mainpage');
+
+    blue('[STOP] Closing...');
+    await browser.close();
+
+    green('Thanks for using InstaLing Bot by PanSzelescik');
+    green('https://github.com/PanSzelescik/instaling-bot');
+}
