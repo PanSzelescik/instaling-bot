@@ -15,7 +15,7 @@ let lastTyped = '';
         return;
     }
 
-    const browser = await puppeteer.launch({headless: false});
+    const browser = await puppeteer.launch({headless: config.show_browser});
     const page = await browser.newPage();
 
     await login(page);
