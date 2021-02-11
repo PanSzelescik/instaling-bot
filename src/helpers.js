@@ -48,6 +48,10 @@ function canLogin() {
     return config.login && config.password;
 }
 
+function useFeature() {
+    return config.feature?.user && config.feature?.password
+}
+
 module.exports = {
     getText: getText,
     click: click,
@@ -56,5 +60,6 @@ module.exports = {
     delay: delay,
     getRandomInt: getRandomInt,
     isVisible: isVisible,
-    canLogin: canLogin
+    canLogin: canLogin,
+    useFeature: useFeature
 };

@@ -2,10 +2,11 @@ const puppeteer = require('puppeteer');
 const config = require('../config/Config.json');
 const {getText, click, clickWait, type, delay, getRandomInt, isVisible, canLogin} = require('./helpers.js');
 const {green, yellow, red, blue} = require('./printer.js');
-const words = require('./words.js');
 const chalk = require('chalk');
+const {insertWord, getWord} = require('./words.js');
 
 let i = 0;
+let lastTyped = '';
 
 // MAIN
 (async () => {
@@ -63,13 +64,16 @@ async function answerQuestion(page) {
     blue(`[ANSWER ${i}] Detected polish word: ${chalk.white(polish)}`);
     await delay(getRandomInt(config.delays.wait_min, config.delays.wait_max));
 
-    if (words.has(polish)) {
-        const translation = words.get(polish);
-        green(`[ANSWER ${i}] Found translation for: ${chalk.white(polish)}: ${chalk.cyan(translation)}`);
+    const translation = await getWord(polish);
+    const englishes = translation?.map?.(obj => obj.english) ?? [];
+    const english = englishes.filter(word => word !== lastTyped)[0];
+    if (english) {
+        green(`[ANSWER ${i}] Found translation for: ${chalk.white(polish)}: ${chalk.cyan(english)}`);
         const random = Math.random();
         if (random < config.valid_chance) {
             green(`[ANSWER ${i}] Typing!`);
-            await type(page, '#answer', translation);
+            lastTyped = english;
+            await type(page, '#answer', english);
         } else {
             yellow(`[ANSWER ${i}] Not typing! ${chalk.white(random)} is higher than ${chalk.cyan(config.valid_chance)}`);
         }
@@ -79,11 +83,11 @@ async function answerQuestion(page) {
 
     await clickWait(page, '#check', config.delays.check_min, config.delays.check_max);
 
-    const english = await getText(page, '#word');
-    blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(english)}`);
-    if (words.get(polish) !== english) {
-        yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(english)}`);
-        await words.set(polish, english);
+    const valid_english = await getText(page, '#word');
+    blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(valid_english)}`);
+    if (!englishes.find(valid_english)) {
+        yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(valid_english)}`);
+        await insertWord(polish, valid_english);
     }
 
     blue(`[ANSWER ${i}] Next word!`);
@@ -91,8 +95,6 @@ async function answerQuestion(page) {
 }
 
 async function handleStop(browser, page) {
-    await words.save();
-
     blue('[STOP] Confirming...');
     await click(page, '#return_mainpage');
 

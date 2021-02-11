@@ -17,5 +17,9 @@
         "next_word_min": 800,
         "next_word_max": 1200
     },
-    "valid_chance": 1
+    "feature": {
+        "user": "",
+        "password": ""
+    },
+    "valid_chance": 0.83
 }

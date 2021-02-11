@@ -1,37 +1,44 @@
-const {writeFile} = require('fs/promises');
-const {blue} = require('./printer.js');
+const axios = require('axios');
+const config = require('../config/Config.json');
+const {useFeature} = require('./helpers.js');
+const https = require('https');
 
-class Words extends Map {
+const agent = new https.Agent({
+    rejectUnauthorized: false
+});
 
-    constructor() {
-        super();
-        this.initializing = true;
-        this.load();
-        blue(`[WORDS] Found ${this.size} words in dictionary`);
-        this.initializing = false;
-    }
-
-    set(polish, english) {
-        super.set(polish, english);
-        if (!this.initializing) {
-            this.save()
-        }
-    }
-
-    load() {
-        try {
-            Object.entries(require('../config/Words.json')).forEach(([polish, english]) => this.set(polish, english));
-        } catch (e) {
-            console.error(e);
-        }
-    }
-
-    save() {
-        blue('[WORDS] Saving words...');
-        const json = {};
-        this.forEach((value, key) => json[key] = value);
-        return writeFile('config/Words.json', JSON.stringify(json, null, 4));
+async function getWord(polish) {
+    if (useFeature) {
+        const {data} = await axios.get('https://api.crawcik.space/instaling.php', {
+            httpsAgent: agent,
+            params: {
+                user: config.feature.user,
+                pass: config.feature.password,
+                type: 'select',
+                pol: polish
+            }
+        });
+        return data
     }
 }
 
-module.exports = new Words();
+async function insertWord(polish, english) {
+    if (useFeature) {
+        const {data} = await axios.get('https://api.crawcik.space/instaling.php', {
+            httpsAgent: agent,
+            params: {
+                user: config.feature.user,
+                pass: config.feature.password,
+                type: 'insert',
+                pol: polish,
+                eng: english
+            }
+        });
+        return data;
+    }
+}
+
+module.exports = {
+    getWord: getWord,
+    insertWord: insertWord
+};
