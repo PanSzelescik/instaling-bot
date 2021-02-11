@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const config = require('../config/Config.json');
-const {getText, click, clickWait, type, delay, getRandomInt, isVisible} = require('./helpers.js');
+const {getText, click, clickWait, type, delay, getRandomInt, isVisible, canLogin} = require('./helpers.js');
 const {green, yellow, red, blue} = require('./printer.js');
 const words = require('./words.js');
 const chalk = require('chalk');
@@ -9,6 +9,11 @@ let i = 0;
 
 // MAIN
 (async () => {
+    if (!canLogin) {
+        red('Please type in config/Config.json your login and password!');
+        return;
+    }
+
     const browser = await puppeteer.launch({headless: false});
     const page = await browser.newPage();
 

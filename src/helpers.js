@@ -44,6 +44,10 @@ async function isVisible(page, selector, delay) {
         .catch(() => false)
 }
 
+function canLogin() {
+    return config.login && config.password;
+}
+
 module.exports = {
     getText: getText,
     click: click,
@@ -51,5 +55,7 @@ module.exports = {
     type: type,
     delay: delay,
     getRandomInt: getRandomInt,
-    isVisible: isVisible
+    isVisible: isVisible,
+    canLogin: canLogin,
+    useDatabase: useDatabase
 };

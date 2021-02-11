@@ -6,7 +6,7 @@ class Words extends Map {
     constructor() {
         super();
         this.initializing = true;
-        Object.entries(require('../config/Words.json')).forEach(([polish, english]) => this.set(polish, english));
+        this.load();
         blue(`[WORDS] Found ${this.size} words in dictionary`);
         this.initializing = false;
     }
@@ -14,7 +14,15 @@ class Words extends Map {
     set(polish, english) {
         super.set(polish, english);
         if (!this.initializing) {
-            return this.save();
+            this.save()
+        }
+    }
+
+    load() {
+        try {
+            Object.entries(require('../config/Words.json')).forEach(([polish, english]) => this.set(polish, english));
+        } catch (e) {
+            console.error(e);
         }
     }
 
