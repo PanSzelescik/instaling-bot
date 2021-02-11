@@ -5,21 +5,21 @@
         "login": "https://instaling.pl/teacher.php?page=login"
     },
     "delays": {
-        "click_min": 2500,
-        "click_max": 3500,
+        "click_min": 2000,
+        "click_max": 3000,
         "type_min": 80,
         "type_max": 130,
-        "selector": 10000,
-        "wait_min": 1800,
-        "wait_max": 3500,
-        "check_min": 2500,
-        "check_max": 3000,
-        "next_word_min": 800,
-        "next_word_max": 1200
+        "selector": 8000,
+        "wait_min": 1500,
+        "wait_max": 2500,
+        "check_min": 1500,
+        "check_max": 2000,
+        "next_word_min": 500,
+        "next_word_max": 1000
     },
     "feature": {
         "user": "",
         "password": ""
     },
-    "valid_chance": 0.83
+    "valid_chance": 1
 }
