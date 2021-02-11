@@ -21,5 +21,6 @@
         "user": "",
         "password": ""
     },
-    "valid_chance": 1
+    "valid_chance": 1,
+    "show_browser": true
 }
