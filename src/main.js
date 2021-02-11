@@ -85,7 +85,7 @@ async function answerQuestion(page) {
 
     const valid_english = await getText(page, '#word');
     blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(valid_english)}`);
-    if (!englishes.find(valid_english)) {
+    if (!englishes.find(word => word === valid_english)) {
         yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(valid_english)}`);
         await insertWord(polish, valid_english);
     }
