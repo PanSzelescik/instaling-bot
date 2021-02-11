@@ -56,6 +56,5 @@ module.exports = {
     delay: delay,
     getRandomInt: getRandomInt,
     isVisible: isVisible,
-    canLogin: canLogin,
-    useDatabase: useDatabase
+    canLogin: canLogin
 };
