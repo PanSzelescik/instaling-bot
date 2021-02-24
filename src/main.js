@@ -4,9 +4,10 @@ const {getText, click, clickWait, type, delay, getRandomInt, isVisible, canLogin
 const {green, yellow, red, blue} = require('./printer.js');
 const chalk = require('chalk');
 const {insertWord, getWord} = require('./words.js');
+const uniqueRandomArray = require('unique-random-array');
 
 let i = 0;
-let lastTyped = '';
+let lastTyped = new Map();
 
 // MAIN
 (async () => {
@@ -66,13 +67,12 @@ async function answerQuestion(page) {
 
     const translation = await getWord(polish);
     const englishes = translation?.map?.(obj => obj.english) ?? [];
-    const english = englishes.filter(word => word !== lastTyped)[0];
+    const english = englishes.find(word => !lastTyped.get(word)) ?? uniqueRandomArray(englishes)();
     if (english) {
         green(`[ANSWER ${i}] Found translation for: ${chalk.white(polish)}: ${chalk.cyan(english)}`);
         const random = Math.random();
         if (random < config.valid_chance) {
             green(`[ANSWER ${i}] Typing!`);
-            lastTyped = english;
             await type(page, '#answer', english);
         } else {
             yellow(`[ANSWER ${i}] Not typing! ${chalk.white(random)} is higher than ${chalk.cyan(config.valid_chance)}`);
@@ -85,6 +85,9 @@ async function answerQuestion(page) {
 
     const valid_english = await getText(page, '#word');
     blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(valid_english)}`);
+    if (english) {
+        lastTyped.set(english, english !== valid_english);
+    }
     if (!englishes.find(word => word === valid_english)) {
         yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(valid_english)}`);
         await insertWord(polish, valid_english);

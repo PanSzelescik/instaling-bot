@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "chalk": "^4.1.0",
-    "puppeteer": "^7.0.4"
+    "puppeteer": "^7.0.4",
+    "unique-random-array": "^2.0.0"
   }
 }
