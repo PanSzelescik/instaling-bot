@@ -1,7 +1,7 @@
 # instaling-bot
 Bot dla automatycznego rozwiązywania słówek na instaling.pl
 
-Przetestowany na Node 15.8.0
+Przetestowany na Node 15.10.0
 
 # Instalacja
 1. Pobierz i zainstaluj Node.js (15+) https://nodejs.org/en/
@@ -24,6 +24,6 @@ npm run start
 - Uruchomienie nauki słówek
 - Udzielanie odpowiedzi na podane słówka
   - Domyślnie odpowiedź jest udzielana dla wszystkich słówek, możesz to zmienić ustalając `chance` w `config/Config.json` (`1` - `100%`, `0.85` - `85%`...)
-  - Słówko musi być dostępne w `config/Words.json`
+  - Słówko musi być dostępne w `config/SavedWords.json`
   - Jeśli nie jest dostępne zostanie zapisane prawidłowe tłumaczenie, w celu udzielania poprawnych odpowiedzi później
 - Gdy nauka słówek się zakończy __nie zamykaj okna przeglądarki!__ Przeglądarka zamknie się sama i zapisze poznane słówka
