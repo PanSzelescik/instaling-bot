@@ -28,7 +28,7 @@ npm run start
   - Jeśli nie jest dostępne zostanie zapisane prawidłowe tłumaczenie, w celu udzielania poprawnych odpowiedzi później
 - Gdy nauka słówek się zakończy __nie zamykaj okna przeglądarki!__ Przeglądarka zamknie się sama i zapisze poznane słówka
 
-6. Objaśnienie configu
+# Objaśnienie configu
 - `login` - login
 - `password` - hasło
 - `sites` - używane strony
