@@ -88,7 +88,7 @@ async function answerQuestion(page) {
     if (english) {
         lastTyped.set(english, english !== valid_english);
     }
-    if (!englishes.find(word => word === valid_english)) {
+    if (valid_english && !englishes.find(word => word === valid_english)) {
         yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(valid_english)}`);
         await insertWord(polish, valid_english);
     }
