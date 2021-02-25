@@ -1,15 +1,32 @@
-const axios = require('axios');
+const {get} = require('axios');
 const config = require('../config/Config.json');
+const words = require('../config/SavedWords.json');
 const {useFeature} = require('./helpers.js');
-const https = require('https');
+const {Agent} = require('https');
+const {writeFile} = require('fs/promises');
 
-const agent = new https.Agent({
+const agent = new Agent({
     rejectUnauthorized: false
 });
 
+async function getAllWords() {
+    if (useFeature()) {
+        const {data} = await get('https://api.crawcik.space/instaling.php', {
+            httpsAgent: agent,
+            params: {
+                user: config.feature.user,
+                pass: config.feature.password,
+                type: 'select'
+            }
+        });
+        return data
+    }
+    return words;
+}
+
 async function getWord(polish) {
-    if (useFeature) {
-        const {data} = await axios.get('https://api.crawcik.space/instaling.php', {
+    if (useFeature()) {
+        const {data} = await get('https://api.crawcik.space/instaling.php', {
             httpsAgent: agent,
             params: {
                 user: config.feature.user,
@@ -20,11 +37,12 @@ async function getWord(polish) {
         });
         return data
     }
+    return words.filter(obj => obj.polish === polish);
 }
 
 async function insertWord(polish, english) {
-    if (useFeature) {
-        const {data} = await axios.get('https://api.crawcik.space/instaling.php', {
+    if (useFeature()) {
+        const {data} = await get('https://api.crawcik.space/instaling.php', {
             httpsAgent: agent,
             params: {
                 user: config.feature.user,
@@ -36,9 +54,16 @@ async function insertWord(polish, english) {
         });
         return data;
     }
+    return words.push({polish: polish, english: english});
+}
+
+async function saveWords() {
+    return writeFile('../config/SavedWords.json', JSON.stringify(words, null, 4), {encoding: 'utf8'})
 }
 
 module.exports = {
+    getAllWords: getAllWords,
     getWord: getWord,
-    insertWord: insertWord
+    insertWord: insertWord,
+    saveWords: saveWords
 };

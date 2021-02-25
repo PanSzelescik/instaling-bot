@@ -1,13 +1,13 @@
 const puppeteer = require('puppeteer');
 const config = require('../config/Config.json');
-const {getText, click, clickWait, type, delay, getRandomInt, isVisible, canLogin} = require('./helpers.js');
+const {getText, click, clickWait, type, delay, getRandomInt, isVisible, canLogin, useFeature} = require('./helpers.js');
 const {green, yellow, red, blue} = require('./printer.js');
 const chalk = require('chalk');
-const {insertWord, getWord} = require('./words.js');
+const {insertWord, getWord, saveWords} = require('./words.js');
 const uniqueRandomArray = require('unique-random-array');
 
 let i = 0;
-let lastTyped = new Map();
+const lastTyped = new Map();
 
 // MAIN
 (async () => {
@@ -100,6 +100,11 @@ async function answerQuestion(page) {
 async function handleStop(browser, page) {
     blue('[STOP] Confirming...');
     await click(page, '#return_mainpage');
+
+    if (!useFeature()) {
+        blue('[STOP] Saving words...');
+        await saveWords();
+    }
 
     blue('[STOP] Closing...');
     await browser.close();
