@@ -1,4 +1,16 @@
 const config = require('../config/Config.json');
+const fs = require('fs/promises');
+
+async function prepare() {
+    await Promise.all([
+        fs.rmdir('pages', {recursive: true}),
+        fs.rmdir('screenshots', {recursive: true})
+    ]);
+    await Promise.all([
+        fs.mkdir('pages', {recursive: true}),
+        fs.mkdir('screenshots', {recursive: true})
+    ]);
+}
 
 async function getText(page, selector) {
     await checkVisibility(page, selector, config.delays.selector);
@@ -17,7 +29,7 @@ async function click(page, selector) {
 async function clickWait(page, selector, wait_min = config.delays.click_min, wait_max = config.delays.click_max) {
     await checkVisibility(page, selector, config.delays.selector);
     await page.click(selector);
-    return delay(getRandomInt(wait_min, wait_max))
+    return delay(getRandomInt(wait_min, wait_max));
 }
 
 async function type(page, selector, text, delay) {
@@ -26,6 +38,10 @@ async function type(page, selector, text, delay) {
 
 async function delay(time) {
     return new Promise(resolve => setTimeout(resolve, time));
+}
+
+async function savePage(page, i) {
+    return fs.writeFile(`pages/answer-${i}.html`, await page.evaluate(() => document.body.innerHTML), 'utf-8');
 }
 
 function getRandomInt(min, max) {
@@ -41,7 +57,7 @@ async function checkVisibility(page, selector, delay = 1000) {
 async function isVisible(page, selector, delay) {
     return checkVisibility(page, selector, delay)
         .then(() => true)
-        .catch(() => false)
+        .catch(() => false);
 }
 
 function canLogin() {
@@ -49,10 +65,11 @@ function canLogin() {
 }
 
 function useFeature() {
-    return config.feature?.user && config.feature?.password
+    return config.feature?.user && config.feature?.password;
 }
 
 module.exports = {
+    prepare: prepare,
     getText: getText,
     click: click,
     clickWait: clickWait,
@@ -61,5 +78,6 @@ module.exports = {
     getRandomInt: getRandomInt,
     isVisible: isVisible,
     canLogin: canLogin,
-    useFeature: useFeature
+    useFeature: useFeature,
+    savePage: savePage
 };

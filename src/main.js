@@ -1,6 +1,18 @@
 const puppeteer = require('puppeteer');
 const config = require('../config/Config.json');
-const {getText, click, clickWait, type, delay, getRandomInt, isVisible, canLogin, useFeature} = require('./helpers.js');
+const {
+    getText,
+    click,
+    clickWait,
+    type,
+    delay,
+    getRandomInt,
+    isVisible,
+    canLogin,
+    useFeature,
+    savePage,
+    prepare
+} = require('./helpers.js');
 const {green, yellow, red, blue} = require('./printer.js');
 const chalk = require('chalk');
 const {insertWord, getWord, saveWords} = require('./words.js');
@@ -16,9 +28,7 @@ const lastTyped = new Map();
         return;
     }
 
-    const browser = await puppeteer.launch({headless: !config.show_browser});
-    const page = await browser.newPage();
-
+    const page = await start();
     await login(page);
     await startSession(page);
     try {
@@ -28,9 +38,28 @@ const lastTyped = new Map();
         }
     } catch (e) {
         console.error(e);
-        await handleStop(browser, page);
+        await savePage(page, 'error');
+        await handleStop(page);
     }
 })();
+
+async function start() {
+    const options = {
+        headless: !config.show_browser,
+        devtools: config.open_devtools
+    };
+
+    if (config.mute_audio) {
+        options.ignoreDefaultArgs = ['--mute-audio'];
+    }
+
+    const [browser] = await Promise.all([
+        puppeteer.launch(options),
+        prepare()
+    ]);
+    const pages = await browser.pages();
+    return pages[0] ?? await browser.newPage();
+}
 
 // STEPS
 async function login(page) {
@@ -59,11 +88,22 @@ async function startSession(page) {
 
 async function answerQuestion(page) {
     i++;
+    await savePage(page, i);
     blue(`[ANSWER ${i}] Detecting word...`);
+    if (await isVisible(page, '#new_word_form')) {
+        red('[WARNING] Unfinished feature!');
+        red('You must manually click and eventually write word');
+        red('You have 30 seconds!');
+        for (let j = 0; j < 6; j++) {
+            await savePage(page, `${i}_feature_${j}`);
+            await delay(5 * 1000);
+        }
+        return;
+    }
     const polish = await getText(page, '#question > div.caption > div.translations');
 
     blue(`[ANSWER ${i}] Detected polish word: ${chalk.white(polish)}`);
-    await delay(getRandomInt(config.delays.wait_min, config.delays.wait_max));
+    //await delay(getRandomInt(config.delays.wait_min, config.delays.wait_max));
 
     const translation = await getWord(polish);
     const englishes = translation?.map?.(obj => obj.english) ?? [];
@@ -97,7 +137,7 @@ async function answerQuestion(page) {
     await clickWait(page, '#next_word', config.delays.next_word_min, config.delays.next_word_max);
 }
 
-async function handleStop(browser, page) {
+async function handleStop(page) {
     blue('[STOP] Confirming...');
     await click(page, '#return_mainpage');
 
@@ -107,7 +147,7 @@ async function handleStop(browser, page) {
     }
 
     blue('[STOP] Closing...');
-    await browser.close();
+    await page.browser().close();
 
     green('Thanks for using InstaLing Bot by PanSzelescik');
     green('https://github.com/PanSzelescik/instaling-bot');

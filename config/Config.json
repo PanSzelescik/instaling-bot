@@ -22,5 +22,7 @@
         "password": ""
     },
     "valid_chance": 1,
-    "show_browser": true
+    "show_browser": true,
+    "open_devtools": true,
+    "mute_audio": true
 }
