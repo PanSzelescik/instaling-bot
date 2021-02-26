@@ -83,7 +83,7 @@ async function answerQuestion(page) {
 
     await clickWait(page, '#check', config.delays.check_min, config.delays.check_max);
 
-    const valid_english = await getText(page, '#word');
+    const valid_english = (await getText(page, '#word')).trim();
     blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(valid_english)}`);
     if (english) {
         lastTyped.set(english, english !== valid_english);

@@ -25,6 +25,10 @@ async function getAllWords() {
 }
 
 async function getWord(polish) {
+    if (!polish) {
+        console.error(new TypeError(`Tried to get word using nullish value: ${polish}! Aborting!`));
+    }
+
     if (useFeature()) {
         const {data} = await get('https://api.crawcik.space/instaling.php', {
             httpsAgent: agent,
@@ -41,6 +45,10 @@ async function getWord(polish) {
 }
 
 async function insertWord(polish, english) {
+    if (!polish || !english) {
+        console.error(new TypeError(`Tried to insert nullish value: ${{polish, english}}! Aborting!`));
+    }
+
     if (useFeature()) {
         const {data} = await get('https://api.crawcik.space/instaling.php', {
             httpsAgent: agent,
@@ -54,7 +62,7 @@ async function insertWord(polish, english) {
         });
         return data;
     }
-    return words.push({polish: polish, english: english});
+    return words.push({polish, english});
 }
 
 async function saveWords() {
