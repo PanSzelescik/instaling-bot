@@ -47,3 +47,5 @@ npm run start
   - `next_word_max` - maksymalny czas oczekiwania między słówkami
 - `valid_chance` - jaka część udzielonych odpowiedzi ma być prawidłowa (`1` - `100%`, `0.85` - `85%`...)
 - `show_browser` - umożliwia widzenie przeglądarki na żywo, bądź jej ukrycie, przydatne jeśli bot jest uruchamiany na Linuxie gdzie nie mamy GUI (wtedy należy wpisać `false`, gdyż bot nie wystartuje)
+- `open_devtools` - pozwala na otwarcie narzędzi deweloperskich razem ze startem bota (uwaga! `show_browser` jest wtedy traktowany jako `true`)
+- `mute_audio` - pozwala na wyciszenie dźwięku z przeglądarki
