@@ -38,7 +38,7 @@ async function start() {
     };
 
     if (config.mute_audio) {
-        options.ignoreDefaultArgs = ['--mute-audio'];
+        options.args = ['--mute-audio'];
     }
 
     const [browser] = await Promise.all([
