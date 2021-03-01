@@ -41,7 +41,10 @@ async function delay(time) {
 }
 
 async function savePage(page, i) {
-    return fs.writeFile(`pages/answer-${i}.html`, await page.evaluate(() => document.body.innerHTML), 'utf-8');
+    return Promise.all([
+        page.screenshot({path: `screenshots/answer-${i}.png`}),
+        fs.writeFile(`pages/answer-${i}.html`, await page.evaluate(() => document.body.innerHTML), 'utf-8')
+    ]);
 }
 
 function getRandomInt(min, max) {
