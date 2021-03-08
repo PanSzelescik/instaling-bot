@@ -60,7 +60,7 @@ async function insertWord(polish, english, sentence) {
                 pass: config.feature.password,
                 type: 'insert',
                 pol: polish,
-                eng: english,
+                eng: english.replace(/'/g, "''"),
                 sentence: sentence
             }
         });
