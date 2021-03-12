@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const config = require('../config/Config.json');
-const {getText, click, clickWait, type, delay, getRandomInt, isVisible, canLogin, useFeature} = require('./helpers.js');
+const {getText, click, clickWait, type, isVisible, canLogin, useFeature, savePage, prepare} = require('./helpers.js');
 const {green, yellow, red, blue} = require('./printer.js');
 const chalk = require('chalk');
 const {insertWord, getWord, saveWords} = require('./words.js');
@@ -16,9 +16,7 @@ const lastTyped = new Map();
         return;
     }
 
-    const browser = await puppeteer.launch({headless: !config.show_browser});
-    const page = await browser.newPage();
-
+    const page = await start();
     await login(page);
     await startSession(page);
     try {
@@ -28,9 +26,28 @@ const lastTyped = new Map();
         }
     } catch (e) {
         console.error(e);
-        await handleStop(browser, page);
+        await savePage(page, 'error');
+        await handleStop(page);
     }
 })();
+
+async function start() {
+    const options = {
+        headless: !config.show_browser,
+        devtools: config.open_devtools
+    };
+
+    if (config.mute_audio) {
+        options.args = ['--mute-audio'];
+    }
+
+    const [browser] = await Promise.all([
+        puppeteer.launch(options),
+        prepare()
+    ]);
+    const pages = await browser.pages();
+    return pages[0] ?? await browser.newPage();
+}
 
 // STEPS
 async function login(page) {
@@ -59,45 +76,67 @@ async function startSession(page) {
 
 async function answerQuestion(page) {
     i++;
+    await savePage(page, i);
     blue(`[ANSWER ${i}] Detecting word...`);
-    const polish = await getText(page, '#question > div.caption > div.translations');
 
+    const [sentence, polish] = await Promise.all([
+        getText(page, '#question > div.usage_example'),
+        getText(page, '#question > div.caption > div.translations')
+    ]);
+
+    blue(`[ANSWER ${i}] Detected sentence: ${chalk.white(sentence)}`);
     blue(`[ANSWER ${i}] Detected polish word: ${chalk.white(polish)}`);
-    await delay(getRandomInt(config.delays.wait_min, config.delays.wait_max));
 
-    const translation = await getWord(polish);
+    const translation = await getWord(polish, sentence);
     const englishes = translation?.map?.(obj => obj.english) ?? [];
     const english = englishes.find(word => !lastTyped.get(word)) ?? uniqueRandomArray(englishes)();
-    if (english) {
-        green(`[ANSWER ${i}] Found translation for: ${chalk.white(polish)}: ${chalk.cyan(english)}`);
-        const random = Math.random();
-        if (random < config.valid_chance) {
-            green(`[ANSWER ${i}] Typing!`);
-            await type(page, '#answer', english);
-        } else {
-            yellow(`[ANSWER ${i}] Not typing! ${chalk.white(random)} is higher than ${chalk.cyan(config.valid_chance)}`);
-        }
+
+    if (await isVisible(page, '#new_word_form')) {
+        await newWord(page);
     } else {
-        red(`[ANSWER ${i}] Not found translation for: ${chalk.white(polish)}`);
-    }
+        if (english) {
+            green(`[ANSWER ${i}] Found translation for: ${chalk.white(polish)}: ${chalk.cyan(english)}`);
+            const random = Math.random();
+            if (random < config.valid_chance) {
+                green(`[ANSWER ${i}] Typing!`);
+                await type(page, '#answer', english);
+            } else {
+                yellow(`[ANSWER ${i}] Not typing! ${chalk.white(random)} is higher than ${chalk.cyan(config.valid_chance)}`);
+            }
+        } else {
+            red(`[ANSWER ${i}] Not found translation for: ${chalk.white(polish)}`);
+        }
 
-    await clickWait(page, '#check', config.delays.check_min, config.delays.check_max);
+        await clickWait(page, '#check', config.delays.check_min, config.delays.check_max);
 
-    const valid_english = (await getText(page, '#word')).trim();
-    blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(valid_english)}`);
-    if (english) {
-        lastTyped.set(english, english !== valid_english);
-    }
-    if (valid_english && !englishes.find(word => word === valid_english)) {
-        yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(valid_english)}`);
-        await insertWord(polish, valid_english);
+        const valid_english = (await getText(page, '#word')).trim();
+        blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(valid_english)}`);
+        if (english) {
+            lastTyped.set(english, english !== valid_english);
+        }
+        if (valid_english && !englishes.find(word => word === valid_english)) {
+            yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(valid_english)}`);
+            await insertWord(polish, valid_english, sentence);
+        }
     }
 
     blue(`[ANSWER ${i}] Next word!`);
     await clickWait(page, '#next_word', config.delays.next_word_min, config.delays.next_word_max);
 }
 
-async function handleStop(browser, page) {
+async function newWord(page) {
+    const known = false;
+    if (known) {
+        console.log('--------- KNOWN ----------');
+        //TODO
+    } else {
+        await savePage(page, `${i}_feature_0`);
+        await clickWait(page, '#dont_know_new', config.delays.check_min, config.delays.check_max);
+        await savePage(page, `${i}_feature_1`);
+    }
+}
+
+async function handleStop(page) {
     blue('[STOP] Confirming...');
     await click(page, '#return_mainpage');
 
@@ -107,7 +146,7 @@ async function handleStop(browser, page) {
     }
 
     blue('[STOP] Closing...');
-    await browser.close();
+    await page.browser().close();
 
     green('Thanks for using InstaLing Bot by PanSzelescik');
     green('https://github.com/PanSzelescik/instaling-bot');
