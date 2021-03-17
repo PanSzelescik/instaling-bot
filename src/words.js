@@ -24,9 +24,10 @@ async function getAllWords() {
     return words;
 }
 
-async function getWord(polish) {
-    if (!polish) {
-        console.error(new TypeError(`Tried to get word using nullish value: ${polish}! Aborting!`));
+async function getWord(polish, sentence) {
+    if (!polish || !sentence) {
+        console.error(new TypeError(`Tried to get word using nullish value! Aborting!`));
+        console.error({polish, sentence});
     }
 
     if (useFeature()) {
@@ -36,7 +37,8 @@ async function getWord(polish) {
                 user: config.feature.user,
                 pass: config.feature.password,
                 type: 'select',
-                pol: polish
+                pol: polish,
+                sentence: sentence
             }
         });
         return data
@@ -44,9 +46,10 @@ async function getWord(polish) {
     return words.filter(obj => obj.polish === polish);
 }
 
-async function insertWord(polish, english) {
-    if (!polish || !english) {
-        console.error(new TypeError(`Tried to insert nullish value: ${{polish, english}}! Aborting!`));
+async function insertWord(polish, english, sentence) {
+    if (!polish || !english || !sentence) {
+        console.error(new TypeError(`Tried to insert nullish value! Aborting!`));
+        console.error({polish, english, sentence});
     }
 
     if (useFeature()) {
@@ -57,12 +60,13 @@ async function insertWord(polish, english) {
                 pass: config.feature.password,
                 type: 'insert',
                 pol: polish,
-                eng: english
+                eng: english.replace(/'/g, "''"),
+                sentence: sentence
             }
         });
         return data;
     }
-    return words.push({polish, english});
+    return words.push({polish, english, sentence});
 }
 
 async function saveWords() {
