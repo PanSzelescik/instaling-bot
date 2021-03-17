@@ -10,9 +10,9 @@
   "author": "PanSzelescik",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.21.1",
-    "chalk": "^4.1.0",
-    "puppeteer": "^7.0.4",
-    "unique-random-array": "^2.0.0"
+    "axios": "0.21.1",
+    "chalk": "4.1.0",
+    "puppeteer": "8.0.0",
+    "unique-random-array": "2.0.0"
   }
 }
