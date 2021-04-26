@@ -41,9 +41,10 @@ async function delay(time) {
 }
 
 async function savePage(page, i) {
+    if (!page) return;
     return Promise.all([
         page.screenshot({path: `screenshots/answer-${i}.png`}),
-        fs.writeFile(`pages/answer-${i}.html`, await page.evaluate(() => document.body.innerHTML), 'utf-8')
+        fs.writeFile(`pages/answer-${i}.html`, await page.evaluate(() => document.documentElement.innerHTML), 'utf-8')
     ]);
 }
 
