@@ -13,7 +13,6 @@ const lastTyped = new Map();
 (async () => {
     let page;
     try {
-        return eventer.emit('stopBot', 1);
         if (!canLogin) {
             red('Please type in config/Config.json your login and password!');
             return;
