@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const config = require('../config/Config.json');
-const {getText, click, clickWait, type, isVisible, canLogin, useFeature, savePage, prepare} = require('./helpers.js');
-const {green, yellow, red, blue} = require('./printer.js');
+const {getText, click, clickWait, type, isVisible, canLogin, useFeature, savePage, prepare, eventer} = require('./helpers.js');
+const {green, yellow, red, blue, error} = require('./printer.js');
 const chalk = require('chalk');
 const {insertWord, getWord, saveWords} = require('./words.js');
 const uniqueRandomArray = require('unique-random-array');
@@ -11,23 +11,33 @@ const lastTyped = new Map();
 
 // MAIN
 (async () => {
-    if (!canLogin) {
-        red('Please type in config/Config.json your login and password!');
-        return;
-    }
-
-    const page = await start();
-    await login(page);
-    await startSession(page);
+    let page;
     try {
-        // Jak się wypierdoli to znaczy że koniec i można zamknąć
-        while (true) {
-            await answerQuestion(page);
+        return eventer.emit('stopBot', 1);
+        if (!canLogin) {
+            red('Please type in config/Config.json your login and password!');
+            return;
         }
-    } catch (e) {
-        console.error(e);
+
+        page = await start();
+        await login(page);
+        await startSession(page);
+        try {
+            // Jak się wypierdoli to znaczy że koniec i można zamknąć
+            while (true) {
+                await answerQuestion(page);
+            }
+        } catch (e) {
+            error(e);
+            await savePage(page, 'error');
+            await handleStop(page);
+            eventer.emit('stopBot', 0);
+        }
+    } catch (err) {
+        error(err);
         await savePage(page, 'error');
         await handleStop(page);
+        eventer.emit('stopBot', 1);
     }
 })();
 
@@ -51,7 +61,23 @@ async function start() {
 
 // STEPS
 async function login(page) {
-    blue('[LOGIN] Logging in...');
+    if (config.debug) {
+        page.on('console', message => console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
+            .on('pageerror', ({ message }) => console.log(message))
+            .on('response', response => console.log(`${response.status()} ${response.url()}`))
+            .on('requestfailed', request => console.log(`${request.failure().errorText} ${request.url()}`))
+    }
+
+    page.on('dialog', async dialog => {
+        red(`Dialog: \`${dialog.message()}\``);
+        if (dialog.message() === 'Błąd połączenia') {
+            error(new Error('Błąd połączenia'));
+            process.exit(1);
+        }
+        await dialog.dismiss();
+    });
+
+    blue(`[LOGIN] Logging in as \`${config.login}\`...`);
     await page.goto(config.sites.login);
 
     await type(page, '#log_email', config.login);
@@ -84,8 +110,8 @@ async function answerQuestion(page) {
         getText(page, '#question > div.caption > div.translations')
     ]);
 
-    blue(`[ANSWER ${i}] Detected sentence: ${chalk.white(sentence)}`);
-    blue(`[ANSWER ${i}] Detected polish word: ${chalk.white(polish)}`);
+    blue(`[ANSWER ${i}] Detected sentence: \`${chalk.white(sentence)}\``);
+    blue(`[ANSWER ${i}] Detected polish word: \`${chalk.white(polish)}\``);
 
     const translation = await getWord(polish, sentence);
     const englishes = translation?.map?.(obj => obj.english) ?? [];
@@ -95,27 +121,27 @@ async function answerQuestion(page) {
         await newWord(page);
     } else {
         if (english) {
-            green(`[ANSWER ${i}] Found translation for: ${chalk.white(polish)}: ${chalk.cyan(english)}`);
+            green(`[ANSWER ${i}] Found translation for: \`${chalk.white(polish)}\`: \`${chalk.cyan(english)}\``);
             const random = Math.random();
             if (random < config.valid_chance) {
                 green(`[ANSWER ${i}] Typing!`);
                 await type(page, '#answer', english);
             } else {
-                yellow(`[ANSWER ${i}] Not typing! ${chalk.white(random)} is higher than ${chalk.cyan(config.valid_chance)}`);
+                yellow(`[ANSWER ${i}] Not typing! \`${chalk.white(random)}\` is higher than \`${chalk.cyan(config.valid_chance)}\``);
             }
         } else {
-            red(`[ANSWER ${i}] Not found translation for: ${chalk.white(polish)}`);
+            red(`[ANSWER ${i}] Not found translation for: \`${chalk.white(polish)}\``);
         }
 
         await clickWait(page, '#check', config.delays.check_min, config.delays.check_max);
 
         const valid_english = (await getText(page, '#word')).trim();
-        blue(`[ANSWER ${i}] Valid translation for: ${chalk.white(polish)} is: ${chalk.cyan(valid_english)}`);
+        blue(`[ANSWER ${i}] Valid translation for: \`${chalk.white(polish)}\` is: \`${chalk.cyan(valid_english)}\``);
         if (english) {
             lastTyped.set(english, english !== valid_english);
         }
         if (valid_english && !englishes.find(word => word === valid_english)) {
-            yellow(`[ANSWER ${i}] Saving translation for: ${chalk.white(polish)}: ${chalk.cyan(valid_english)}`);
+            yellow(`[ANSWER ${i}] Saving translation for: \`${chalk.white(polish)}\`: \`${chalk.cyan(valid_english)}\``);
             await insertWord(polish, valid_english, sentence);
         }
     }
@@ -137,6 +163,7 @@ async function newWord(page) {
 }
 
 async function handleStop(page) {
+    if (!page) return;
     blue('[STOP] Confirming...');
     await click(page, '#return_mainpage');
 

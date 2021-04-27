@@ -1,5 +1,19 @@
 const config = require('../config/Config.json');
 const fs = require('fs/promises');
+const {EventEmitter} = require('events');
+const {interval, sendAndClear} = require('./printer.js');
+
+const eventer = new EventEmitter();
+
+eventer.on('stopBot', async code => {
+    try {
+        clearInterval(interval);
+        await sendAndClear();
+    } catch (e) {
+        console.error(e);
+    }
+    process.exit(code || 0);
+});
 
 async function prepare() {
     await Promise.all([
@@ -83,5 +97,6 @@ module.exports = {
     isVisible: isVisible,
     canLogin: canLogin,
     useFeature: useFeature,
-    savePage: savePage
+    savePage: savePage,
+    eventer: eventer
 };
