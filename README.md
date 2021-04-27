@@ -1,10 +1,10 @@
 # instaling-bot
 Bot dla automatycznego rozwiązywania słówek na instaling.pl
 
-Przetestowany na Node 15.10.0
+Wymaga Node.js 14+ (Powinien działać bez problemu na 14, 15 i 16)
 
 # Instalacja
-1. Pobierz i zainstaluj Node.js (15+) https://nodejs.org/en/
+1. Pobierz i zainstaluj Node.js (14+) https://nodejs.org/en/
 2. Sklonuj repozytorium:
 ```
 git clone https://github.com/PanSzelescik/instaling-bot.git
@@ -49,3 +49,5 @@ npm run start
 - `show_browser` - umożliwia widzenie przeglądarki na żywo, bądź jej ukrycie, przydatne jeśli bot jest uruchamiany na Linuxie gdzie nie mamy GUI (wtedy należy wpisać `false`, gdyż bot nie wystartuje)
 - `open_devtools` - pozwala na otwarcie narzędzi deweloperskich razem ze startem bota (uwaga! `show_browser` jest wtedy traktowany jako `true`)
 - `mute_audio` - pozwala na wyciszenie dźwięku z przeglądarki
+- `debug` - umożliwia wyświetlanie dodatkowych logów z przeglądarki (nie są one wysyłane przez webhook!)
+- `webhook` - możesz tutaj wpisać adres URL [webhooka Discorda](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks), wtedy logi są wysyłane również przez tego webhooka
