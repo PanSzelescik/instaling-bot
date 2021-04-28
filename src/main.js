@@ -82,7 +82,7 @@ async function login(page) {
     await type(page, '#log_email', config.login);
     await type(page, '#log_password', config.password);
 
-    await click(page, '#main-container > div:nth-child(2) > form > div > div:nth-child(3) > button');
+    await click(page, '#main-container > div:nth-child(3) > form > div > div:nth-child(3) > button');
     green('[LOGIN] Logged in!');
 }
 
