@@ -71,7 +71,7 @@ async function login(page) {
         red(`Dialog: \`${dialog.message()}\``);
         if (dialog.message() === 'Błąd połączenia') {
             error(new Error('Błąd połączenia'));
-            process.exit(1);
+            eventer.emit('stopBot', 1);
         }
         await dialog.dismiss();
     });
