@@ -43,11 +43,12 @@ const lastTyped = new Map();
 async function start() {
     const options = {
         headless: !config.show_browser,
-        devtools: config.open_devtools
+        devtools: config.open_devtools,
+        args: [`--disable-extensions-except=${__dirname}/../uBlock_Origin_1.34.0_0/`, '--load-extension=${__dirname}/../uBlock_Origin_1.34.0_0/']
     };
 
     if (config.mute_audio) {
-        options.args = ['--mute-audio'];
+        options.args.push('--mute-audio');
     }
 
     const [browser] = await Promise.all([
