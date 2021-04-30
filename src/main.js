@@ -159,6 +159,8 @@ async function newWord(page) {
         await savePage(page, `${i}_feature_0`);
         await clickWait(page, '#dont_know_new', config.delays.check_min, config.delays.check_max);
         await savePage(page, `${i}_feature_1`);
+        blue(`[ANSWER ${i}] Next word!`);
+        await clickWait(page, '#skip > #next_word', config.delays.next_word_min, config.delays.next_word_max);
     }
 }
 
