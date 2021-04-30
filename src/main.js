@@ -118,7 +118,7 @@ async function answerQuestion(page) {
     const english = englishes.find(word => !lastTyped.get(word)) ?? uniqueRandomArray(englishes)();
 
     if (await isVisible(page, '#new_word_form')) {
-        await newWord(page);
+        return newWord(page);
     } else {
         if (english) {
             green(`[ANSWER ${i}] Found translation for: \`${chalk.white(polish)}\`: \`${chalk.cyan(english)}\``);
