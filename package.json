@@ -15,6 +15,6 @@
     "discord.js": "^12.5.3",
     "puppeteer": "^9.0.0",
     "strip-ansi": "^6.0.0",
-    "unique-random-array": "^2.0.0"
+    "unique-random-array": "^3.0.0"
   }
 }
