@@ -13,7 +13,7 @@
     "axios": "^0.21.1",
     "chalk": "^4.1.1",
     "discord.js": "^12.5.3",
-    "puppeteer": "^9.0.0",
+    "puppeteer": "^10.0.0",
     "strip-ansi": "^6.0.0",
     "unique-random-array": "^2.0.0"
   }
