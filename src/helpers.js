@@ -98,5 +98,5 @@ module.exports = {
     canLogin: canLogin,
     useFeature: useFeature,
     savePage: savePage,
-    eventer: eventer
+    eventer
 };
